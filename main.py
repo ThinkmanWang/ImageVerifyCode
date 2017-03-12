@@ -83,12 +83,11 @@ if __name__ == '__main__':
     try:
         pid = os.fork()
         if pid > 0:
+            print("pid: %s" % (pid, ))
             sys.exit(0)
     except OSError, e:
         print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
         sys.exit(1)
-
-    logging ("start Get image verify")
 
     client = APIClient()
     paramDict = {}
