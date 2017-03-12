@@ -80,14 +80,14 @@ nSuccess = 0
 nFailed = 0
 
 if __name__ == '__main__':
-    try:
-        pid = os.fork()
-        if pid > 0:
-            print("pid: %s" % (pid, ))
-            sys.exit(0)
-    except OSError, e:
-        print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
-        sys.exit(1)
+    # try:
+    #     pid = os.fork()
+    #     if pid > 0:
+    #         print("pid: %s" % (pid, ))
+    #         sys.exit(0)
+    # except OSError, e:
+    #     print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
+    #     sys.exit(1)
 
     client = APIClient()
     paramDict = {}
@@ -111,6 +111,9 @@ if __name__ == '__main__':
     # print ("File Count: %d" % (len[dirs]))
 
     for file in dirs:
+        if (len(file) > 8):
+            continue
+
         nCount += 1
         filebytes = open("images/" + file, "rb").read()
 
@@ -123,16 +126,22 @@ if __name__ == '__main__':
         if (str(retCode+".jpg").lower() == file.lower()):
             nSuccess += 1
             logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+            print("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+
         else:
             nFailed += 1
-            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+            logging.info("NO %d %s ==> %s Failed!!!" % (nCount, file.lower(), str(retCode).lower()))
+            print("NO %d %s ==> %s Failed!!!" % (nCount, file.lower(), str(retCode).lower()))
 
         if (len(file) > 8):
             os.rename("images/" + file, "images/" + retCode+".jpg")
             logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+            print("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
 
         if (nCount % 50 == 0):
-            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+            logging.info("All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
+            print("All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
 
 
     logging.info("Done All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
+    print("Done All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
