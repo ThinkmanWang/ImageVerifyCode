@@ -80,14 +80,14 @@ nSuccess = 0
 nFailed = 0
 
 if __name__ == '__main__':
-    # try:
-    #     pid = os.fork()
-    #     if pid > 0:
-    #         print("pid: %s" % (pid, ))
-    #         sys.exit(0)
-    # except OSError, e:
-    #     print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
-    #     sys.exit(1)
+    try:
+        pid = os.fork()
+        if pid > 0:
+            print("pid: %s" % (pid, ))
+            sys.exit(0)
+    except OSError, e:
+        print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
+        sys.exit(1)
 
     client = APIClient()
     paramDict = {}
