@@ -3,8 +3,15 @@
 
 import sys, hashlib, os, random, urllib, urllib2
 from datetime import *
-from PIL import Image
+# from PIL import Image
 import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',\
+    datefmt='%a, %d %b %Y %H:%M:%S',\
+    filename='myapp.log',\
+    filemode='w')
 
 class APIClient(object):
     def http_request(self, url, paramDict):
@@ -73,6 +80,16 @@ nSuccess = 0
 nFailed = 0
 
 if __name__ == '__main__':
+    try:
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(0)
+    except OSError, e:
+        print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
+        sys.exit(1)
+
+    logging ("start Get image verify")
+
     client = APIClient()
     paramDict = {}
     result = ''
@@ -92,6 +109,8 @@ if __name__ == '__main__':
                  ]
 
     dirs = os.listdir("images")
+    # print ("File Count: %d" % (len[dirs]))
+
     for file in dirs:
         nCount += 1
         filebytes = open("images/" + file, "rb").read()
@@ -102,11 +121,19 @@ if __name__ == '__main__':
         jObj = json.loads(result)
         retCode = jObj["Result"]
 
-        if (retCode+".jpg" == file):
+        if (str(retCode+".jpg").lower() == file.lower()):
             nSuccess += 1
+            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
         else:
             nFailed += 1
+            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
 
-        print ("Doing %s return %s" % (file, retCode))
+        if (len(file) > 8):
+            os.rename("images/" + file, "images/" + retCode+".jpg")
+            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
 
-    print ("Done All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
+        if (nCount % 50 == 0):
+            logging.info("NO %d %s ==> %s" % (nCount, file.lower(), str(retCode).lower()))
+
+
+    logging.info("Done All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
