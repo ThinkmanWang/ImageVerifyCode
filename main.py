@@ -4,6 +4,7 @@
 import sys, hashlib, os, random, urllib, urllib2
 from datetime import *
 from PIL import Image
+import json
 
 class APIClient(object):
     def http_request(self, url, paramDict):
@@ -67,6 +68,10 @@ def arguments_to_dict(args):
 
     return argDict
 
+nCount = 0
+nSuccess = 0
+nFailed = 0
+
 if __name__ == '__main__':
     client = APIClient()
     paramDict = {}
@@ -86,12 +91,22 @@ if __name__ == '__main__':
                  'softkey'
                  ]
 
-    imagePath = "images/p0ko.jpg"
-    img = Image.open(imagePath)
-    if img is None:
-        print 'get file error!'
-    else:
-        img.save("upload.jpg", format="jpeg")
-        filebytes = open("upload.jpg", "rb").read()
+    dirs = os.listdir("images")
+    for file in dirs:
+        nCount += 1
+        filebytes = open("images/" + file, "rb").read()
+
+        # print "Doing " + file
         result = client.http_upload_image("http://api.ysdm.net/create.json", paramKeys, paramDict, filebytes)
-        print(result)
+        # print result
+        jObj = json.loads(result)
+        retCode = jObj["Result"]
+
+        if (retCode+".jpg" == file):
+            nSuccess += 1
+        else:
+            nFailed += 1
+
+        print ("Doing %s return %s" % (file, retCode))
+
+    print ("Done All: %d Success: %d Failed: %d" % (nCount, nSuccess, nFailed))
